@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DigitAll - Controle de Produção</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff', 300: '#d8b4fe',
+                400: '#c084fc', 500: '#a855f7', 600: '#9333ea', 700: '#7e22ce',
+                800: '#6b21a8', 900: '#581c87',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- SDK Biometria Digital Persona -->
+    <!-- Caminhos relativos (.) para garantir carregamento local ou em subpastas -->
+    <script src="./js/es6-shim.js"></script>
+    <script src="./js/websdk.client.bundle.min.js"></script>
+    <script src="./js/fingerprint.sdk.min.js"></script>
+    
+    <script>
+      window.define = null;
+      console.log('Scripts de Biometria injetados via HTML');
+      
+      // Verificação robusta do carregamento
+      function checkFingerprintSdk() {
+        if(window.Fingerprint) {
+            console.log('✅ SDK Fingerprint carregado com sucesso.');
+        } else {
+            console.warn('⚠️ window.Fingerprint não encontrado no onload. Verificando caminhos...');
+            // Tenta verificar se o script falhou silenciosamente ou se está atrasado
+            setTimeout(function() {
+               if(window.Fingerprint) console.log('✅ SDK Fingerprint carregado (atrasado).');
+               else console.error('❌ ERRO CRÍTICO: SDK Fingerprint não carregou. Verifique se os arquivos .js estão na pasta /public/js e se o caminho no index.html está correto.');
+            }, 2000);
+        }
+      }
+      
+      window.addEventListener('load', checkFingerprintSdk);
+    </script>
+    
+    <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "path": "https://aistudiocdn.com/path@^0.12.7"
+  }
+}
+</script>
+  </head>
+  <body class="bg-gray-50 text-gray-900 font-sans antialiased">
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
