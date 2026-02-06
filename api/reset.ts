@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { hasDbConfig, sql } from '../services/db';
+import { hasDbConfig, sql } from '../services/db.js';
 import crypto from 'crypto';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;

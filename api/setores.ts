@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { hasDbConfig, sql } from '../services/db';
+import { hasDbConfig, sql } from '../services/db.js';
 
 // POST /api/setores { nome }
 export default async function handler(req: VercelRequest, res: VercelResponse) {
