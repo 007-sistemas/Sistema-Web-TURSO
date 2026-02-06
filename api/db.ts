@@ -23,7 +23,7 @@ const getClient = () => {
 
 const buildQuery = (strings: TemplateStringsArray, values: unknown[]) => {
   let text = strings[0];
-  const args: unknown[] = [];
+  const args: any[] = [];
 
   for (let i = 0; i < values.length; i += 1) {
     text += `?${strings[i + 1]}`;
@@ -35,6 +35,6 @@ const buildQuery = (strings: TemplateStringsArray, values: unknown[]) => {
 
 export const sql = async (strings: TemplateStringsArray, ...values: unknown[]) => {
   const { text, args } = buildQuery(strings, values);
-  const result = await getClient().execute({ sql: text, args });
+  const result = await getClient().execute({ sql: text, args: args as any });
   return result.rows ?? [];
 };

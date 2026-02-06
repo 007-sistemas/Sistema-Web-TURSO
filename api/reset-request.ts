@@ -159,7 +159,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       VALUES (${resetId}, ${manager.id}, ${codeHash}, ${expiresAt}, false)
     `;
 
-    const emailResult = manager.email ? await sendEmail(manager.email, code, manager.username) : { sent: false, reason: 'No email configured' };
+    const managerEmail = manager.email ? String(manager.email) : '';
+    const managerUsername = manager.username ? String(manager.username) : '';
+    const emailResult = managerEmail ? await sendEmail(managerEmail, code, managerUsername) : { sent: false, reason: 'No email configured' };
     const provider = (emailResult as any)?.smtp ? 'smtp' : (emailResult as any)?.resend ? 'resend' : undefined;
     const response: any = { ok: true, expiresAt, emailSent: emailResult.sent, provider };
 
