@@ -19,12 +19,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method === "GET") {
       // Garantir colunas esperadas em bases antigas
-      await sql`ALTER TABLE cooperados ADD COLUMN IF NOT EXISTS matricula text`;
-      await sql`ALTER TABLE cooperados ADD COLUMN IF NOT EXISTS specialty text`;
-      await sql`ALTER TABLE cooperados ADD COLUMN IF NOT EXISTS status text`;
-      await sql`ALTER TABLE cooperados ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT NOW()`;
+      try { await sql`ALTER TABLE cooperados ADD COLUMN IF NOT EXISTS matricula text`; } catch {}
+      try { await sql`ALTER TABLE cooperados ADD COLUMN IF NOT EXISTS specialty text`; } catch {}
+      try { await sql`ALTER TABLE cooperados ADD COLUMN IF NOT EXISTS status text`; } catch {}
+      try { await sql`ALTER TABLE cooperados ADD COLUMN IF NOT EXISTS updated_at text DEFAULT CURRENT_TIMESTAMP`; } catch {}
 
-      const rows = await sql`SELECT id, name, cpf, email, phone, specialty, matricula, status, updated_at FROM cooperados ORDER BY updated_at DESC LIMIT 200`;
+      let rows: any[] = [];
+      try {
+        rows = await sql`SELECT id, name, cpf, email, phone, specialty, matricula, status, updated_at FROM cooperados ORDER BY updated_at DESC LIMIT 200`;
+      } catch {
+        rows = await sql`SELECT id, name, cpf, email, phone, specialty, matricula, status, updated_at FROM cooperados LIMIT 200`;
+      }
       res.status(200).json(rows);
       return;
     }

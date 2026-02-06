@@ -100,9 +100,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       id text PRIMARY KEY,
       manager_id text NOT NULL,
       code_hash text NOT NULL,
-      expires_at timestamptz NOT NULL,
+      expires_at text NOT NULL,
       used boolean DEFAULT false,
-      created_at timestamptz DEFAULT now()
+      created_at text DEFAULT CURRENT_TIMESTAMP
     );`;
 
     // Parse seguro do body

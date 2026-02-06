@@ -23,12 +23,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     // Garante colunas esperadas em bases antigas
-    await sql`ALTER TABLE managers ADD COLUMN IF NOT EXISTS cpf text`;
-    await sql`ALTER TABLE managers ADD COLUMN IF NOT EXISTS email text`;
-    await sql`ALTER TABLE managers ADD COLUMN IF NOT EXISTS permissoes jsonb DEFAULT '{}'::jsonb`;
-    await sql`ALTER TABLE managers ADD COLUMN IF NOT EXISTS preferences jsonb`;
+    try { await sql`ALTER TABLE managers ADD COLUMN IF NOT EXISTS cpf text`; } catch {}
+    try { await sql`ALTER TABLE managers ADD COLUMN IF NOT EXISTS email text`; } catch {}
+    try { await sql`ALTER TABLE managers ADD COLUMN IF NOT EXISTS permissoes text DEFAULT '{}'`; } catch {}
+    try { await sql`ALTER TABLE managers ADD COLUMN IF NOT EXISTS preferences text`; } catch {}
 
-    const rows = await sql`SELECT id, username, password, cpf, email, permissoes, preferences FROM managers ORDER BY created_at DESC`;
+    let rows: any[] = [];
+    try {
+      rows = await sql`SELECT id, username, password, cpf, email, permissoes, preferences FROM managers ORDER BY created_at DESC`;
+    } catch {
+      rows = await sql`SELECT id, username, password, cpf, email, permissoes, preferences FROM managers`;
+    }
     res.status(200).json(rows);
   } catch (err: any) {
     res.status(500).json({ error: err?.message || 'Unknown error' });

@@ -19,11 +19,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method === 'GET') {
       // Garantir colunas esperadas em bases antigas
-      await sql`ALTER TABLE hospitals ADD COLUMN IF NOT EXISTS usuario_acesso text`;
-      await sql`ALTER TABLE hospitals ADD COLUMN IF NOT EXISTS senha text`;
-      await sql`ALTER TABLE hospitals ADD COLUMN IF NOT EXISTS permissoes jsonb`;
+      try { await sql`ALTER TABLE hospitals ADD COLUMN IF NOT EXISTS usuario_acesso text`; } catch {}
+      try { await sql`ALTER TABLE hospitals ADD COLUMN IF NOT EXISTS senha text`; } catch {}
+      try { await sql`ALTER TABLE hospitals ADD COLUMN IF NOT EXISTS permissoes text`; } catch {}
 
-      const rows = await sql`SELECT id, nome, slug, usuario_acesso, senha, permissoes FROM hospitals ORDER BY created_at DESC`;
+      let rows: any[] = [];
+      try {
+        rows = await sql`SELECT id, nome, slug, usuario_acesso, senha, permissoes FROM hospitals ORDER BY created_at DESC`;
+      } catch {
+        rows = await sql`SELECT id, nome, slug, usuario_acesso, senha, permissoes FROM hospitals`;
+      }
       res.status(200).json(rows);
       return;
     }
@@ -45,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ${usuarioAcesso},
           ${senha},
           ${JSON.stringify(permissoes || {})},
-          NOW()
+          CURRENT_TIMESTAMP
         )
         ON CONFLICT (id) DO UPDATE SET
           nome = EXCLUDED.nome,
