@@ -74,7 +74,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     setResetInfo('');
     setProvider('');
     try {
-      const resp: any = await apiPost('reset-request', { identifier });
+      const resp: any = await apiPost('reset', { action: 'request', identifier });
       const prov = resp?.provider ? String(resp.provider) : '';
       setProvider(prov);
       if (resp?.emailSent) {
@@ -117,7 +117,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     }
     setCodeVerifying(true);
     try {
-      await apiPost('reset-verify', { identifier, code: resetCode });
+      await apiPost('reset', { action: 'verify', identifier, code: resetCode });
       setCodeMessage({ type: 'success', text: '✓ Código válido' });
       setResetInfo('Código validado. Agora, defina a nova senha.');
       StorageService.logAudit('RESET_CODIGO_VALIDADO', `Código válido para ${identifier}`);
@@ -153,7 +153,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       return;
     }
     try {
-      await apiPost('reset-confirm', { identifier, code: resetCode, newPassword: newPass });
+      await apiPost('reset', { action: 'confirm', identifier, code: resetCode, newPassword: newPass });
       StorageService.logAudit('RESET_CONFIRMADO', `Senha redefinida para ${identifier}`);
       setResetInfo('Senha redefinida com sucesso. Use a nova senha para entrar.');
       setPassword(newPass);

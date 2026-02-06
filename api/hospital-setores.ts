@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { hasDbConfig, sql } from './db';
+import { hasDbConfig, sql } from '../services/db';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!hasDbConfig()) {
