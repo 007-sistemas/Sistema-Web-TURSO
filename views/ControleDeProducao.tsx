@@ -919,9 +919,45 @@ export const ControleDeProducao: React.FC<Props> = ({ mode = 'manager' }) => {
     const entradaTimestamp = new Date(`${formData}T${formHoraEntrada}:00`).toISOString();
     const saidaTimestamp = formHoraSaida ? new Date(`${formData}T${formHoraSaida}:00`).toISOString() : null;
 
+    const getLocalDate = (timestamp: string) => {
+      const d = new Date(timestamp);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+    const getLocalTime = (timestamp: string) => {
+      const d = new Date(timestamp);
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      return `${h}:${m}`;
+    };
+
+    let resolvedEntryId = selectedEntryId;
+    const selectedEntry = resolvedEntryId ? logs.find(p => p.id === resolvedEntryId) : undefined;
+    const selectedMatchesForm = selectedEntry
+      && selectedEntry.tipo === TipoPonto.ENTRADA
+      && selectedEntry.cooperadoId === formCooperadoId
+      && String(selectedEntry.hospitalId || '') === String(filterHospital)
+      && String(selectedEntry.setorId || '') === String(formSetorId)
+      && getLocalDate(selectedEntry.timestamp) === formData
+      && getLocalTime(selectedEntry.timestamp) === formHoraEntrada;
+
+    if (!selectedMatchesForm) {
+      const candidate = logs.find(p =>
+        p.tipo === TipoPonto.ENTRADA
+        && p.cooperadoId === formCooperadoId
+        && String(p.hospitalId || '') === String(filterHospital)
+        && String(p.setorId || '') === String(formSetorId)
+        && getLocalDate(p.timestamp) === formData
+        && getLocalTime(p.timestamp) === formHoraEntrada
+      );
+      resolvedEntryId = candidate?.id || null;
+    }
+
     // Edição de registro existente
-    if (selectedEntryId) {
-      const entryPonto = logs.find(p => p.id === selectedEntryId);
+    if (resolvedEntryId) {
+      const entryPonto = logs.find(p => p.id === resolvedEntryId);
       if (!entryPonto) {
         alert("Entrada não encontrada.");
         return;
