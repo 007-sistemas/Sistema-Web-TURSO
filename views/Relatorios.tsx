@@ -101,48 +101,23 @@ export const Relatorios: React.FC = () => {
     try {
       const response = await apiGet<Setor[]>(`hospital-setores?hospitalId=${hospitalId}`);
       if (response && response.length > 0) {
-        setSetoresDisponiveis(response);
+        const normalized = response.map((s: any) => ({ ...s, id: s.id }));
+        setSetoresDisponiveis(normalized);
       } else {
-        // Fallback para setores padrão
-        const defaultSetores: Setor[] = [
-          { id: 1, nome: 'UTI' },
-          { id: 2, nome: 'Pronto Atendimento' },
-          { id: 3, nome: 'Centro Cirúrgico' },
-          { id: 4, nome: 'Ambulatório' },
-          { id: 5, nome: 'Maternidade' }
-        ];
-        setSetoresDisponiveis(defaultSetores);
+        setSetoresDisponiveis([]);
       }
     } catch (error) {
       console.error('Erro ao carregar setores:', error);
-      // Fallback para setores padrão
-      const defaultSetores: Setor[] = [
-        { id: 1, nome: 'UTI' },
-        { id: 2, nome: 'Pronto Atendimento' },
-        { id: 3, nome: 'Centro Cirúrgico' },
-        { id: 4, nome: 'Ambulatório' },
-        { id: 5, nome: 'Maternidade' }
-      ];
-      setSetoresDisponiveis(defaultSetores);
+      setSetoresDisponiveis([]);
     }
   };
 
   const loadAllSetores = async () => {
     try {
-      const setoresByHospital = await Promise.all(
-        hospitais.map(async (hospital) => {
-          try {
-            const setores = await apiGet<Setor[]>(`hospital-setores?hospitalId=${hospital.id}`);
-            return setores || [];
-          } catch {
-            return [];
-          }
-        })
-      );
-
-      const flattened = setoresByHospital.flat();
-      const unique = flattened.filter((setor, index, self) => 
-        index === self.findIndex(s => s.id === setor.id)
+      const globalSetores = await apiGet<Setor[]>('setores');
+      const normalized = (globalSetores || []).map((s: any) => ({ ...s, id: s.id }));
+      const unique = normalized.filter((setor, index, self) =>
+        index === self.findIndex(s => String(s.id) === String(setor.id))
       );
       setTodosSetores(unique);
       console.log('[Relatorios] Setores carregados:', unique);
@@ -165,13 +140,17 @@ export const Relatorios: React.FC = () => {
       
       const cooperado = cooperados.find(c => c.id === entrada.cooperadoId);
       const hospital = hospitais.find(h => h.id === entrada.hospitalId);
-      // Buscar setor em todosSetores (não apenas setoresDisponiveis do filtro)
-      const setor = todosSetores.find(s => s.id.toString() === entrada.setorId);
+      const setorId = entrada.setorId ? String(entrada.setorId) : '';
+      // Buscar setor apenas no que existe no banco
+      const setor = setorId
+        ? (todosSetores.find(s => String(s.id) === setorId)
+            || setoresDisponiveis.find(s => String(s.id) === setorId))
+        : undefined;
 
       if (!cooperado || !hospital) return;
       // Aplicar filtros
       if (filterHospital && entrada.hospitalId !== filterHospital) return;
-      if (filterSetor && entrada.setorId !== filterSetor) return;
+      if (filterSetor && String(entrada.setorId || '') !== String(filterSetor)) return;
       if (filterCooperado && entrada.cooperadoId !== filterCooperado) return;
       if (filterCategoria && cooperado.categoriaProfissional !== filterCategoria) return;
       // Filtro de status
