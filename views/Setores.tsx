@@ -37,7 +37,8 @@ export const SetoresView: React.FC = () => {
     try {
       setLoading(true);
       const data = await apiGet<Setor[]>('setores');
-      setSetores(data);
+      const normalized = data.map((s) => ({ ...s, id: String(s.id) }));
+      setSetores(normalized);
       setUseLocal(false);
     } catch (err) {
       console.warn('API indisponível, usando localStorage:', err);
@@ -53,16 +54,16 @@ export const SetoresView: React.FC = () => {
     try {
       setLoading(true);
       
-      if (useLocal) {
-        // Fallback: usar localStorage com ID numérico
-        const maxId = Math.max(...setores.map(s => s.id), 0);
-        const novoSetor = { id: maxId + 1, nome: novoNome.trim() };
+            if (useLocal) {
+        // Fallback: usar localStorage com ID numérico (string)
+        const maxId = Math.max(0, ...setores.map(s => Number(s.id) || 0));
+        const novoSetor: Setor = { id: String(maxId + 1), nome: novoNome.trim() };
         saveSetorLocal(novoSetor);
         setSetores(getSetoresLocal());
       } else {
         // API: POST só com o nome, backend gera o ID
         const novoSetor = await apiPost<Setor>('setores', { nome: novoNome.trim() });
-        setSetores([...setores, novoSetor]);
+        setSetores([...setores, { ...novoSetor, id: String(novoSetor.id) }]);
       }
       
       setNovoNome('');
@@ -79,7 +80,7 @@ export const SetoresView: React.FC = () => {
     setEditingNome(setor.nome);
   };
 
-  const handleSaveEdit = async (setorId: number) => {
+  const handleSaveEdit = async (setorId: string) => {
     if (!editingNome.trim()) return;
     try {
       setLoading(true);
@@ -116,7 +117,7 @@ export const SetoresView: React.FC = () => {
     setEditingNome('');
   };
 
-  const handleDelete = async (setorId: number) => {
+  const handleDelete = async (setorId: string) => {
     if (!confirm('Tem certeza que deseja excluir este setor?')) return;
     try {
       setLoading(true);
@@ -151,7 +152,7 @@ export const SetoresView: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">Setores</h2>
       {useLocal && (
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
-          ⚠️ API indisponível. Usando armazenamento local (dados não persistem no Neon).
+          ⚠️ API indisponível. Usando armazenamento local (dados não persistem no Turso).
         </div>
       )}
       <div className="flex gap-2 mb-6">

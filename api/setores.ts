@@ -10,9 +10,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { nome } = req.body;
     if (!nome) return res.status(400).json({ error: 'nome obrigatório' });
     try {
+      const nextIdRows = await sql`
+        SELECT COALESCE(MAX(CAST(id AS INTEGER)), 0) + 1 AS next_id FROM setores
+      `;
+      const nextId = nextIdRows[0]?.next_id ?? 1;
       const inserted = await sql`
-        INSERT INTO setores (nome) 
-        VALUES (${nome})
+        INSERT INTO setores (id, nome) 
+        VALUES (${nextId}, ${nome})
         RETURNING id, nome
       `;
       return res.status(201).json(inserted[0]);
