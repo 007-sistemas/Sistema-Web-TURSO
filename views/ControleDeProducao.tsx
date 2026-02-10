@@ -684,20 +684,22 @@ export const ControleDeProducao: React.FC<Props> = ({ mode = 'manager' }) => {
           saidaIndex = saidas.findIndex(s => s.relatedId === entrada.id && !processedExits.has(s.id));
         }
 
-        // 3ª prioridade: mesmo código e timestamp posterior
+        // 3ª prioridade: mesmo código e timestamp posterior (apenas saídas sem relatedId)
         if (saidaIndex === -1) {
           saidaIndex = saidas.findIndex(s => 
             s.codigo === entrada.codigo &&
             new Date(s.timestamp).getTime() > new Date(entrada.timestamp).getTime() &&
-            !processedExits.has(s.id)
+            !processedExits.has(s.id) &&
+            !s.relatedId
           );
         }
 
-        // 4ª prioridade: próxima saída cronológica (comportamento antigo)
+        // 4ª prioridade: próxima saída cronológica (apenas saídas sem relatedId)
         if (saidaIndex === -1) {
           saidaIndex = saidas.findIndex(s => 
             new Date(s.timestamp).getTime() > new Date(entrada.timestamp).getTime() &&
-            !processedExits.has(s.id)
+            !processedExits.has(s.id) &&
+            !s.relatedId
           );
         }
 
